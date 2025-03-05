@@ -8,7 +8,7 @@ LIBFT_INC	= -I ./libft
 LIBFT_LIB	= -L ./libft -lft
 
 SER_SRC = server.c
-CLI_SRC = client.cc
+CLI_SRC = client.c
 
 SER_O = $(SER_SRC:.c=.o)
 CLI_O = $(CLI_SRC:.c=.o)
@@ -34,6 +34,8 @@ clean:
 	make -C libft/ clean
 	make -C printf/ clean
 	rm -f $(SER_O) $(CLI_O)
+
+tidy: all clean
 
 fclean:	clean
 		make -C libft/ fclean

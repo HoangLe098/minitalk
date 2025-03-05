@@ -25,7 +25,7 @@ int	main(int ac, char ** av)
 	i = 0;
 	if (ac == 3)
 	{
-		pid = atoi(av[1]);
+		pid = ft_atoi(av[1]);
 		while (av[2][i])
 		{
 			signal_action(pid, av[2][i]);
@@ -34,6 +34,6 @@ int	main(int ac, char ** av)
 		signal_action(pid, '\n');
 	}
 	else
-		return(printf("Wrong arguments\n"), EXIT_FAILURE);
+		return(ft_printf("Wrong arguments\n"), EXIT_FAILURE);
 	return(EXIT_SUCCESS);
 }

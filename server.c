@@ -11,7 +11,7 @@ void	signal_handler(int signal)
 	bit++ ;
 	if (bit == 8)
 	{
-		printf("%c", c);
+		ft_printf("%c", c);
 		bit = 0;
 		c = 0;
 	}
@@ -23,15 +23,15 @@ int	main(int ac, char **av)
 
 	(void)av;
 	if (ac != 1)
-		return(printf("Wrong arguments!\n"), EXIT_FAILURE);
+		return(ft_printf("Wrong arguments!\n"), EXIT_FAILURE);
 	pid_id = getpid();
-	printf("Server ID: %d\n", pid_id);
-	printf("Waiting for the sinal...\n");
+	ft_printf("Server ID: %d\n", pid_id);
+	ft_printf("Waiting for the sinal...\n");
+	if (signal(SIGUSR1, signal_handler) == SIG_ERR)
+		return(ft_printf("Error SIGUSR1 signal handler"), 1);
+	if (signal(SIGUSR2, signal_handler) == SIG_ERR)
+		return(ft_printf("Error SIGUSR2 signal handler"), 1);
 	while (1)
-	{
-		signal(SIGUSR1, signal_handler);
-		signal(SIGUSR2, signal_handler);
 		pause();
-	}
 	return (EXIT_SUCCESS);
 }

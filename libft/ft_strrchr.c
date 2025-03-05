@@ -13,12 +13,10 @@
 char	*ft_strrchr(const char *s, int c)
 {
 	const char		*ptr;
-	int				i;
 	unsigned char	cc;
 
 	cc = (unsigned char)c;
 	ptr = s;
-	i = 0;
 	while (*ptr != 0)
 		ptr++ ;
 	if (cc == 0)

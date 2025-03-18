@@ -1,11 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   client.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hoale <hoale@student.hive.fi>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/03/13 13:17:58 by hoale             #+#    #+#             */
+/*   Updated: 2025/03/15 18:00:34 by hoale            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "minitalk.h"
 
-static volatile int	g_msg_received = 0;
+static int	g_msg_received = 0;
 
 static void	handle_server_signal(int sig, siginfo_t *info, void *context)
 {
-	static int	bit = 0;
+	static int		bit = 0;
 	static pid_t	server_pid;
 
 	(void)context;
@@ -20,8 +31,7 @@ static void	handle_server_signal(int sig, siginfo_t *info, void *context)
 	{
 		g_msg_received = 1;
 		usleep(400);
-		ft_printf("Server (PID: %d) received %d bytes", server_pid, bit / 8);
-		ft_printf("(%d bits) and printed the full msg.\n", bit);
+		ft_printf("Server (%d) received %d bytes", server_pid, bit / 8);
 		exit(EXIT_SUCCESS);
 	}
 }
@@ -29,18 +39,20 @@ static void	handle_server_signal(int sig, siginfo_t *info, void *context)
 void	send_char(pid_t pid, char c)
 {
 	int	bit;
+	int	i;
 
-	bit = 0;
-	while (bit < 8)
+	i = 7;
+	while (i >= 0)
 	{
-		if (c & (0x01 << bit))
-			kill(pid, SIGUSR1);
-		else
+		bit = (c & (1 << i));
+		if (bit != 0)
 			kill(pid, SIGUSR2);
+		else
+			kill(pid, SIGUSR1);
 		while (g_msg_received == 0)
 			pause();
 		g_msg_received = 0;
-		bit++ ;
+		i-- ;
 	}
 }
 
@@ -55,26 +67,48 @@ static void	send_msg(int pid, char *msg)
 		i++ ;
 	}
 	send_char(pid, '\0');
-	while (g_msg_received == 0)
-		pause();
 }
 
-int	main(int ac, char ** av)
+static int	is_valid_pid(char *pid)
 {
-	pid_t	pid;
-	char	*msg;
-	int		i;
+	int	i;
 
 	i = 0;
-	if (ac == 3)
+	if (pid[i] == '\0')
+		return (0);
+	while (pid[i])
 	{
-		signal(SIGUSR1, handle_server_signal);
-		signal(SIGUSR2, handle_server_signal);
+		if (pid[i] > '9' || pid[i] < '0')
+			return (0);
+		i++ ;
+	}
+	if (ft_atoi(pid) <= 0)
+		return (0);
+	if (kill(ft_atoi(pid), 0) == -1)
+		return (0);
+	return (1);
+}
+
+int	main(int ac, char **av)
+{
+	pid_t				pid;
+	char				*msg;
+	int					i;
+	struct sigaction	sa;
+
+	i = 0;
+	if (ac == 3 && is_valid_pid(av[1]))
+	{
+		sa.sa_flags = SA_SIGINFO;
+		sa.sa_sigaction = handle_server_signal;
+		sigemptyset(&sa.sa_mask);
+		sigaction(SIGUSR1, &sa, NULL);
+		sigaction(SIGUSR2, &sa, NULL);
 		pid = ft_atoi(av[1]);
 		msg = av[2];
 		send_msg(pid, msg);
 	}
 	else
-		return(ft_printf("Wrong arguments\n"), EXIT_FAILURE);
-	return(EXIT_SUCCESS);
+		return (ft_printf("Wrong arguments\n"), EXIT_FAILURE);
+	return (EXIT_SUCCESS);
 }
